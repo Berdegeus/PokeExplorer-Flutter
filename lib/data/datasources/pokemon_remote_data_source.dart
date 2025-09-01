@@ -6,6 +6,8 @@ import '../models/pokemon_detail_model.dart';
 abstract class PokemonRemoteDataSource {
   Future<List<PokemonModel>> getPokemonList({int offset = 0, int limit = 20});
   Future<PokemonDetailModel> getPokemonDetails(String url);
+  Future<PokemonDetailModel> searchPokemon(String query);
+
 }
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   final http.Client client;
@@ -35,6 +37,22 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
       return PokemonDetailModel.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load Pokémon details');
+    }
+  }
+
+  @override
+  Future<PokemonDetailModel> searchPokemon(String query) async {
+    // A API aceita nome ou id, então podemos usar o mesmo endpoint
+    final response = await client.get(Uri.parse('$_baseUrl/${query.toLowerCase()}'));
+
+    if (response.statusCode == 200) {
+      return PokemonDetailModel.fromJson(json.decode(response.body));
+    } else {
+      // Lança uma exceção específica para "não encontrado"
+      if (response.statusCode == 404) {
+        throw Exception('Pokémon não encontrado.');
+      }
+      throw Exception('Falha ao buscar o Pokémon.');
     }
   }
 }

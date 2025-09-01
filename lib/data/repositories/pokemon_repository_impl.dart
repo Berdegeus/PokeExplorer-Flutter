@@ -29,4 +29,14 @@ class PokemonRepositoryImpl implements PokemonRepository {
       throw Exception('Error fetching details: $e');
     }
   }
+
+  @override
+  Future<PokemonDetail> searchPokemon(String query) async {
+    try {
+      return await remoteDataSource.searchPokemon(query);
+    } catch (e) {
+      // Propaga a exceção para a camada de apresentação tratar
+      rethrow;
+    }
+  }
 }
